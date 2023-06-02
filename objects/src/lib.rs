@@ -3,6 +3,7 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
+use assembly::{Assembler, AssemblyContext, AssemblyContextType, LibraryPath, Module, ModuleAst, ProgramAst};
 use crypto::{
     hash::rpo::{Rpo256 as Hasher, RpoDigest as Digest},
     merkle::{MerkleError, Mmr},
