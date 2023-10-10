@@ -1,4 +1,4 @@
-use super::{build_module_path, MemAdviceProvider, TX_KERNEL_DIR, ZERO};
+use super::{build_module_path, DefaultHost, MemAdviceProvider, ProcessState, TX_KERNEL_DIR, ZERO};
 use crate::memory::{CREATED_NOTE_SECTION_OFFSET, CREATED_NOTE_VAULT_HASH_OFFSET, NOTE_MEM_SIZE};
 use mock::{
     mock::{notes::AssetPreservationStatus, transaction::mock_executed_tx},
@@ -33,7 +33,7 @@ fn test_epilogue() {
         imports,
         &code,
         executed_transaction.stack_inputs(),
-        MemAdviceProvider::from(executed_transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(executed_transaction.advice_provider_inputs())),
         Some(assembly_file),
     )
     .unwrap();
@@ -82,7 +82,9 @@ fn test_compute_created_note_hash() {
             imports,
             &test,
             executed_transaction.stack_inputs(),
-            MemAdviceProvider::from(executed_transaction.advice_provider_inputs()),
+            DefaultHost::new(MemAdviceProvider::from(
+                executed_transaction.advice_provider_inputs(),
+            )),
             Some(assembly_file),
         )
         .unwrap();
@@ -91,13 +93,13 @@ fn test_compute_created_note_hash() {
         let expected_vault_hash = note.vault().hash();
         let vault_hash_memory_address =
             CREATED_NOTE_SECTION_OFFSET + i * NOTE_MEM_SIZE + CREATED_NOTE_VAULT_HASH_OFFSET;
-        let actual_vault_hash = process.get_memory_value(0, vault_hash_memory_address).unwrap();
+        let actual_vault_hash = process.get_mem_value(0, vault_hash_memory_address).unwrap();
         assert_eq!(expected_vault_hash.as_elements(), actual_vault_hash);
 
         // assert the note hash is correct
         let expected_hash = note.hash();
         let note_hash_memory_address = CREATED_NOTE_SECTION_OFFSET + i * NOTE_MEM_SIZE;
-        let actual_note_hash = process.get_memory_value(0, note_hash_memory_address).unwrap();
+        let actual_note_hash = process.get_mem_value(0, note_hash_memory_address).unwrap();
         assert_eq!(&actual_note_hash, expected_hash.as_elements());
     }
 }
@@ -131,7 +133,9 @@ fn test_epilogue_asset_preservation_violation() {
             imports,
             &code,
             executed_transaction.stack_inputs(),
-            MemAdviceProvider::from(executed_transaction.advice_provider_inputs()),
+            DefaultHost::new(MemAdviceProvider::from(
+                executed_transaction.advice_provider_inputs(),
+            )),
             Some(assembly_file),
         );
 
@@ -166,7 +170,7 @@ fn test_epilogue_increment_nonce_success() {
         imports,
         &code,
         executed_transaction.stack_inputs(),
-        MemAdviceProvider::from(executed_transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(executed_transaction.advice_provider_inputs())),
         Some(assembly_file),
     )
     .unwrap();
@@ -197,7 +201,7 @@ fn test_epilogue_increment_nonce_violation() {
         imports,
         &code,
         executed_transaction.stack_inputs(),
-        MemAdviceProvider::from(executed_transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(executed_transaction.advice_provider_inputs())),
         Some(assembly_file),
     );
 

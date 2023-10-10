@@ -5,7 +5,8 @@ use miden_objects::{
 };
 use std::{fs::File, io::Read, path::PathBuf};
 use vm_processor::{
-    AdviceProvider, ExecutionError, ExecutionOptions, Process, Program, StackInputs, Word,
+    AdviceProvider, DefaultHost, ExecutionError, ExecutionOptions, Process, Program, StackInputs,
+    Word,
 };
 
 pub mod builders;
@@ -31,16 +32,18 @@ fn load_file_with_code(imports: &str, code: &str, assembly_file: PathBuf) -> Str
 pub fn run_tx<A>(
     program: Program,
     stack_inputs: StackInputs,
-    mut adv: A,
-) -> Result<Process<A>, ExecutionError>
+    mut host: DefaultHost<A>,
+) -> Result<Process<DefaultHost<A>>, ExecutionError>
 where
     A: AdviceProvider,
 {
     // mock account method for testing from root context
-    adv.insert_into_map(Word::default(), vec![Felt::new(255)]).unwrap();
+    host.advice_provider_mut()
+        .insert_into_map(Word::default(), vec![Felt::new(255)])
+        .unwrap();
 
     let mut process =
-        Process::new(program.kernel().clone(), stack_inputs, adv, ExecutionOptions::default());
+        Process::new(program.kernel().clone(), stack_inputs, host, ExecutionOptions::default());
     process.execute(&program)?;
     Ok(process)
 }
@@ -50,14 +53,16 @@ pub fn run_within_tx_kernel<A>(
     imports: &str,
     code: &str,
     stack_inputs: StackInputs,
-    mut adv: A,
+    mut host: DefaultHost<A>,
     file_path: Option<PathBuf>,
-) -> Result<Process<A>, ExecutionError>
+) -> Result<Process<DefaultHost<A>>, ExecutionError>
 where
     A: AdviceProvider,
 {
     // mock account method for testing from root context
-    adv.insert_into_map(Word::default(), vec![Felt::new(255)]).unwrap();
+    host.advice_provider_mut()
+        .insert_into_map(Word::default(), vec![Felt::new(255)])
+        .unwrap();
 
     let assembler = assembler();
 
@@ -69,7 +74,7 @@ where
     let program = assembler.compile(code).unwrap();
 
     let mut process =
-        Process::new(program.kernel().clone(), stack_inputs, adv, ExecutionOptions::default());
+        Process::new(program.kernel().clone(), stack_inputs, host, ExecutionOptions::default());
     process.execute(&program)?;
     Ok(process)
 }

@@ -1,4 +1,4 @@
-use super::{Felt, MemAdviceProvider, Word, ONE, ZERO};
+use super::{DefaultHost, Felt, MemAdviceProvider, ProcessState, Word, ONE, ZERO};
 use crate::memory;
 use miden_objects::{
     accounts::AccountId,
@@ -42,7 +42,7 @@ fn test_get_balance() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -76,7 +76,7 @@ fn test_get_balance_non_fungible_fails() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     );
 
     assert!(process.is_err());
@@ -107,7 +107,7 @@ fn test_has_non_fungible_asset() {
     let process = run_tx(
         inputs.tx_program().clone(),
         inputs.stack_inputs(),
-        MemAdviceProvider::from(inputs.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -145,7 +145,7 @@ fn test_add_fungible_asset_success() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -155,7 +155,7 @@ fn test_add_fungible_asset_success() {
     );
 
     assert_eq!(
-        process.get_memory_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
         *account_vault.commitment()
     );
 }
@@ -191,7 +191,7 @@ fn test_add_non_fungible_asset_fail_overflow() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     );
 
     assert!(process.is_err());
@@ -232,7 +232,7 @@ fn test_add_non_fungible_asset_success() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -242,7 +242,7 @@ fn test_add_non_fungible_asset_success() {
     );
 
     assert_eq!(
-        process.get_memory_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
         *account_vault.commitment()
     );
 }
@@ -279,7 +279,7 @@ fn test_add_non_fungible_asset_fail_duplicate() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     );
 
     assert!(process.is_err());
@@ -317,7 +317,7 @@ fn test_remove_fungible_asset_success_no_balance_remaining() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -327,7 +327,7 @@ fn test_remove_fungible_asset_success_no_balance_remaining() {
     );
 
     assert_eq!(
-        process.get_memory_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
         *account_vault.commitment()
     );
 }
@@ -362,7 +362,7 @@ fn test_remove_fungible_asset_fail_remove_too_much() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     );
     assert!(process.is_err());
 }
@@ -398,7 +398,7 @@ fn test_remove_fungible_asset_success_balance_remaining() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -408,7 +408,7 @@ fn test_remove_fungible_asset_success_balance_remaining() {
     );
 
     assert_eq!(
-        process.get_memory_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
         *account_vault.commitment()
     );
 }
@@ -445,7 +445,7 @@ fn test_remove_non_fungible_asset_fail_doesnt_exist() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     );
 
     assert!(process.is_err());
@@ -484,7 +484,7 @@ fn test_remove_non_fungible_asset_success() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -494,7 +494,7 @@ fn test_remove_non_fungible_asset_success() {
     );
 
     assert_eq!(
-        process.get_memory_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, memory::ACCT_VAULT_ROOT_PTR).unwrap(),
         *account_vault.commitment()
     );
 }

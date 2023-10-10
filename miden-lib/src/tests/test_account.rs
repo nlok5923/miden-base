@@ -1,4 +1,4 @@
-use super::{Felt, MemAdviceProvider, StackInputs, Word, ONE, ZERO};
+use super::{DefaultHost, Felt, MemAdviceProvider, ProcessState, StackInputs, Word, ONE, ZERO};
 use crate::memory::{ACCT_CODE_ROOT_PTR, ACCT_NEW_CODE_ROOT_PTR};
 use miden_objects::accounts::{
     AccountId, AccountType, ACCOUNT_ID_FUNGIBLE_FAUCET_ON_CHAIN, ACCOUNT_ID_INSUFFICIENT_ONES,
@@ -43,19 +43,19 @@ pub fn test_set_code_is_not_immediate() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
     // assert the code root is not changed
     assert_eq!(
-        process.get_memory_value(0, ACCT_CODE_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, ACCT_CODE_ROOT_PTR).unwrap(),
         transaction.account().code().root().as_elements()
     );
 
     // assert the new code root is cached
     assert_eq!(
-        process.get_memory_value(0, ACCT_NEW_CODE_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, ACCT_NEW_CODE_ROOT_PTR).unwrap(),
         [ONE, Felt::new(2), Felt::new(3), Felt::new(4)]
     );
 }
@@ -94,14 +94,14 @@ pub fn test_set_code_succeeds() {
         "",
         &code,
         executed_transaction.stack_inputs(),
-        MemAdviceProvider::from(executed_transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(executed_transaction.advice_provider_inputs())),
         None,
     )
     .unwrap();
 
     // assert the code root is changed after the epilogue
     assert_eq!(
-        process.get_memory_value(0, ACCT_CODE_ROOT_PTR).unwrap(),
+        process.get_mem_value(0, ACCT_CODE_ROOT_PTR).unwrap(),
         [ZERO, ONE, Felt::new(2), Felt::new(3)]
     );
 }
@@ -142,7 +142,7 @@ pub fn test_account_type() {
                 "",
                 &code,
                 StackInputs::new(vec![account_id.into()]),
-                MemAdviceProvider::default(),
+                DefaultHost::default(),
                 None,
             )
             .unwrap();
@@ -171,7 +171,7 @@ fn test_validate_id_fails_on_insuficcient_ones() {
     );
 
     let result =
-        run_within_tx_kernel("", &code, StackInputs::default(), MemAdviceProvider::default(), None);
+        run_within_tx_kernel("", &code, StackInputs::default(), DefaultHost::default(), None);
 
     assert!(result.is_err());
 }
@@ -212,7 +212,7 @@ fn test_get_item() {
         let _process = run_tx(
             transaction.tx_program().clone(),
             StackInputs::from(transaction.stack_inputs()),
-            MemAdviceProvider::from(transaction.advice_provider_inputs()),
+            DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
         )
         .unwrap();
     }
@@ -257,7 +257,7 @@ fn test_get_child_tree_item() {
     let _process = run_tx(
         transaction.tx_program().clone(),
         StackInputs::from(transaction.stack_inputs()),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 }
@@ -316,7 +316,7 @@ fn test_set_item() {
     let _process = run_tx(
         transaction.tx_program().clone(),
         StackInputs::from(transaction.stack_inputs()),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 }
@@ -353,14 +353,9 @@ fn test_is_faucet_procedure() {
             expected = if account_id.is_faucet() { 1 } else { 0 },
         );
 
-        let _process = run_within_tx_kernel(
-            "",
-            &code,
-            StackInputs::default(),
-            MemAdviceProvider::default(),
-            None,
-        )
-        .unwrap();
+        let _process =
+            run_within_tx_kernel("", &code, StackInputs::default(), DefaultHost::default(), None)
+                .unwrap();
     }
 }
 
@@ -404,7 +399,7 @@ fn test_authenticate_procedure() {
         let process = run_tx(
             transaction.tx_program().clone(),
             StackInputs::from(transaction.stack_inputs()),
-            MemAdviceProvider::from(transaction.advice_provider_inputs()),
+            DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
         );
 
         match valid {
@@ -443,7 +438,7 @@ fn test_get_vault_commitment() {
     let _process = run_tx(
         transaction.tx_program().clone(),
         StackInputs::from(transaction.stack_inputs()),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 }

@@ -1,4 +1,4 @@
-use super::{Felt, MemAdviceProvider};
+use super::{DefaultHost, Felt, MemAdviceProvider};
 use miden_objects::notes::Note;
 use mock::{
     mock::{account::MockAccountType, notes::AssetPreservationStatus, transaction::mock_inputs},
@@ -30,7 +30,7 @@ fn test_get_sender_no_sender() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     );
     assert!(process.is_err());
 }
@@ -60,7 +60,7 @@ fn test_get_sender() {
     let process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 
@@ -117,7 +117,7 @@ fn test_get_vault_data() {
     let _process = run_tx(
         transaction.tx_program().clone(),
         transaction.stack_inputs(),
-        MemAdviceProvider::from(transaction.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(transaction.advice_provider_inputs())),
     )
     .unwrap();
 }
@@ -226,7 +226,7 @@ fn test_get_assets() {
     let _process = run_tx(
         inputs.tx_program().clone(),
         inputs.stack_inputs(),
-        MemAdviceProvider::from(inputs.advice_provider_inputs()),
+        DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider_inputs())),
     )
     .unwrap();
 }
