@@ -7,6 +7,7 @@ use crate::{
     },
     ExecutedTransactionError,
 };
+use miden_crypto::Felt;
 use vm_core::StackOutputs;
 
 #[derive(Debug)]
@@ -72,9 +73,14 @@ impl ExecutedTransaction {
         &self.tx_script
     }
 
-    /// Returns the block reference.
+    /// Returns the block hash.
     pub fn block_hash(&self) -> Digest {
         self.block_header.hash()
+    }
+
+    /// Returns the block height.
+    pub fn block_num(&self) -> Felt {
+        self.block_header.block_num()
     }
 
     /// Returns the stack inputs required when executing the transaction.
