@@ -7,6 +7,7 @@ use super::{
 };
 use assembly::AssemblyError;
 use core::fmt;
+use vm_processor::DeserializationError;
 
 // ACCOUNT ERROR
 // ================================================================================================
@@ -14,6 +15,7 @@ use core::fmt;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum AccountError {
     AccountCodeAssemblerError(AssemblyError),
+    AccountCodeNoProcedures,
     AccountCodeTooManyProcedures {
         max: usize,
         actual: usize,
@@ -171,6 +173,7 @@ impl std::error::Error for AssetError {}
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum NoteError {
+    NoteDeserializationError(DeserializationError),
     DuplicateFungibleAsset(AccountId),
     DuplicateNonFungibleAsset(NonFungibleAsset),
     EmptyAssetList,
